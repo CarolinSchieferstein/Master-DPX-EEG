@@ -23,7 +23,7 @@ from mne import pick_types, Annotations
 # ========================================================================
 # --- global settings
 # prompt user to set project path
-root_path = input("Type path to project directory: ")
+root_path = input("Type path to project directory: ") ## muss ich noch einrichten
 
 # look for directory
 if os.path.isdir(root_path):
@@ -92,7 +92,7 @@ for file in files:
 
     # channels to be checked by artifact detection procedure
     ch_ix = [raw_copy.info['ch_names'].index(chan) for chan in
-             raw_copy.info['ch_names'] if chan not in ignore_ch]  # noqa
+             raw_copy.info['ch_names'] if chan not in ignore_ch]  # noqa <- was soll das heißen?
 
     # detect artifacts (i.e., absolute amplitude > 500 microV)
     times = []
@@ -118,7 +118,7 @@ for file in files:
         # Save onsets
         annotations_df = pd.DataFrame(times)
         annotations_df.columns = ['Onsets']
-        # Include one second before artifact onset
+        # Include one second before artifact onset                      # da wird dann eig schon recht viel rausgeschmissen?
         onsets = (annotations_df['Onsets'].values / sfreq) - 1
         # Merge with previous annotations
         duration = [2] * len(onsets) + list(raw_copy.annotations.duration)
