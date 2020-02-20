@@ -30,7 +30,7 @@ else:
     raise NameError('Directory not found!')
 
 # path to eeg files
-data_path = os.path.join(root_path, 'derivatives/artifact_rejection')
+data_path = os.path.join(root_path, 'derivatives/artifact_detection')
 # path to eeg files
 ica_path = os.path.join(root_path, 'derivatives/ica')
 # output path
@@ -41,7 +41,7 @@ if not os.path.isdir(os.path.join(output_path)):
     os.mkdir(os.path.join(output_path))
 
 # files to be analysed
-files = glob.glob(os.path.join(data_path, '*-raw.fif'))
+files = glob.glob(os.path.join(data_path, 'sub-*', '*-raw.fif'))
 
 for file in files:
 
@@ -53,23 +53,19 @@ for file in files:
     # --- 2) Read in the data ----------------------------------
     raw = read_raw_fif(file, preload=True)
 
-    events = find_events(raw,
-                         stim_channel='Status',
-                         output='onset',
-                         min_duration=0.002)
-
     # --- 4) Import ICA weights --------------------------------
-    ica = read_ica(os.path.join(ica_path, '%s_ica.fif' % subj))
+    ica = read_ica(os.path.join(ica_path, 'sub-%s' % subj, 'sub-%s-ica.fif' % subj))
 
     # --- 5) Plot components time series -----------------------
     # Select bad components for rejection
     ica.plot_sources(raw, title=str(filename),
-                     exclude=None,
                      picks=range(0, 25),
                      block=True)
 
     # Save bad components
     bad_comps = ica.exclude.copy()
+
+    ica.plot_overlay(raw, exclude=bad_comps, picks='eeg')
 
     # --- 4) Remove bad components -----------------------------
     ica.apply(raw)
@@ -78,15 +74,19 @@ for file in files:
     # Plot to check data
     clip = None
     raw.plot(n_channels=66, title=str(filename),
-             scalings=dict(eeg=100e-6),
-             events=events,
+             scalings=dict(eeg=50e-6),
              bad_color='red',
              clipping=clip,
              block=True)
 
     # --- 6) Write summary about removed components ------------
+    # create directory for save
+    if not os.path.exists(os.path.join(output_path, 'sub-%s' % subj)):
+        os.mkdir(os.path.join(output_path, 'sub-%s' % subj))
+
+    # save summary
     name = '%s_ica_summary' % subj
-    file = open(os.path.join(output_path, '%s.txt' % name), 'w')
+    file = open(os.path.join(output_path, 'sub-%s' % subj, '%s.txt' % name), 'w')
     # Number of Trials
     file.write('bad components\n')
     for cp in bad_comps:
@@ -103,6 +103,6 @@ for file in files:
                        stim=True)
 
     # Save pruned data
-    raw.save(os.path.join(output_path, '%s_pruned-raw.fif' % subj),
+    raw.save(os.path.join(output_path, 'sub-%s' % subj, '%s_pruned-raw.fif' % subj),
              picks=picks,
              overwrite=True)
