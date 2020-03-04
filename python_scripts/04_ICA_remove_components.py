@@ -1,9 +1,9 @@
-# --- jose C. garcia alanis
+# --- carolin schieferstein & jose c. garcia alanis
 # --- utf-8
-# --- Python 3.7.3 / mne 0.18.1
+# --- Python 3.7 / mne 0.20
 #
 # --- eeg pre-processing for dpx-r40
-# --- version: june 2019
+# --- version: february 2020
 #
 # --- import data, crate info for file
 # --- save to .fif

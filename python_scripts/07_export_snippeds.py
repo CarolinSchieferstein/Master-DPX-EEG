@@ -1,9 +1,9 @@
-# --- Jose C. Garcia Alanis
+# ---  carolin schieferstein & jose c. garcia alanis
 # --- utf-8
-# --- Python 3.6.2
+# --- Python 3.7 / mne 0.20
 #
 # --- EEG prepossessing - DPX R40
-# --- Version Sep 2018
+# --- version march 2020 [WIP]
 #
 # --- Apply baseline, crop for smaller file, and
 # ---Export epochs to .txt

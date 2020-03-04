@@ -2,7 +2,7 @@
 # --- utf-8
 # --- Python 3.7 / mne 0.20
 #
-# --- eeg pre-processing for DPX R40
+# --- eeg pre-processing for dpx-r40
 # --- version: november 2019
 #
 # --- import data,

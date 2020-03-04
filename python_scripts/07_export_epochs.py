@@ -1,3 +1,10 @@
+# ---  carolin schieferstein & jose c. garcia alanis
+# --- utf-8
+# --- Python 3.7 / mne 0.20
+#
+# --- EEG prepossessing - dpx-r40 [WIP]
+# --- version march 2020 [WIP]
+
 import mne
 import re
 import glob

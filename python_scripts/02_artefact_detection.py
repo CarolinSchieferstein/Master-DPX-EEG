@@ -2,8 +2,8 @@
 # --- utf-8
 # --- Python 3.7 / mne 0.20
 #
-# --- eeg pre-processing for DPX R40
-# --- version: dez 2019
+# --- eeg pre-processing for dpx-r40
+# --- version: january 2020
 #
 # --- detect and annotate artifact distorted segments in continuous data,
 # --- average reference

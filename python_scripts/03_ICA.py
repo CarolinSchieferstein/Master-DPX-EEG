@@ -3,7 +3,7 @@
 # --- Python 3.7 / mne 0.20
 #
 # --- eeg pre-processing for dpx-r40
-# --- version: jan 2020
+# --- version: january 2020
 #
 # --- import data, crate info for file
 # --- save to .fif
