@@ -94,8 +94,15 @@ names(fb) <- c("sex", "age", "Abschluss", "Beruf", "ID",
 VP_Zuordnung <- read.delim("VP_Zuordnung.txt", header = TRUE, sep = "\t")
 fb <- merge(fb,VP_Zuordnung, by = "ID")
 
+# VP_Zuordnung wie in rt
+VP_Zuordnung2 <- read.delim("VP_Zuordnung2.txt", header = TRUE, sep = "\t")
+fb <- merge(fb,VP_Zuordnung2, by = "ID")
+
 # ordnen
-fb <- select(fb, ID, group, sex:Dauergesamt)
+fb <- select(fb, id, group, sex:Dauergesamt)
+
+# id wieder zu ID
+colnames(fb)[colnames(fb)=="id"] <- "ID"
 
 # Save dataset for later use
 write.table(fb, '/run/media/carolin/2672-DC99/dpx_r40/data_fb/fb.txt', row.names = F, sep = '\t')
