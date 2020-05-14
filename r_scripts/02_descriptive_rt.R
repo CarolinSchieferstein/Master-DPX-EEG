@@ -53,28 +53,28 @@ Correct_sum <- Correct %>% group_by(trialtype, group) %>%
                                      se_rt = sd(rt)/sqrt(sum(!is.na(rt))),
                                      n = sum(!is.na(rt)))
 
+require(ggplot2)
+ggplot(Correct_sum, aes(x=trialtype, y=m_rt)) +
+  geom_errorbar(aes(ymin=m_rt-se_rt, ymax=m_rt+se_rt), colour="black", width=.1, position=position_dodge(.5)) +
+  geom_line(position=position_dodge(.5)) +
+  geom_point(position=position_dodge(.5), size=3) +
+  facet_wrap(~group)
+
+
+# group aesthetic anpassen, da momentan nur 1 Beobachtung pro Gruppe
 # require(ggplot2)
-# ggplot(Hits_sum, aes(x=Trialtype, y=m_RT)) + 
-#   geom_errorbar(aes(ymin=m_RT-se_RT, ymax=m_RT+se_RT), colour="black", width=.1, position=position_dodge(.5)) +
-#   geom_line(position=position_dodge(.5)) +
-#   geom_point(position=position_dodge(.5), size=3) +
-#   facet_wrap(~Rew)
-# 
-# 
-# 
-# require(ggplot2)
-# ggplot(Hits_sum_plot_All, aes(x=Trialtype, y=m_RT, color = Phase, group = Phase)) +
-#   geom_errorbar(aes(ymin=m_RT-se_RT, ymax=m_RT+se_RT),
+# ggplot(Correct_sum, aes(x=trialtype, y=m_rt)) +
+#   geom_errorbar(aes(ymin=m_rt-se_rt, ymax=m_rt+se_rt),
 #                 colour="black",
-#                 width=.25,      # Breite der Querstriche am Ende der Fehlerbalken
+#                 width=.25,                                # Breite der Querstriche am Ende der Fehlerbalken
 #                 position=position_dodge(.25),
 #                 size = .6) +
 #   geom_line(position=position_dodge(.25), size = 1) +
 #   geom_point(position=position_dodge(.25), size = 3) +
-#   facet_wrap(~ Rew, ncol = 2, scales = 'free_y') +      # free_y --> y-Achse an beide teile einzeln
-#   coord_cartesian(ylim = c(200, 500)) +         # Range der Y-Achse
-#   theme_classic() +     # weißer Hintergrund etc., gibt viele einfach ausprobieren, welches man möchte
-#   labs(x = 'Trialtype', y = 'Mittlere Reaktionszeit', title = "Mittlere Reaktionszeit in der Haupttestung") +
+#   facet_wrap(~ group, ncol = 2, scales = 'free_y') +      # free_y --> y-Achse an beide teile einzeln
+#   coord_cartesian(ylim = c(200, 500)) +                   # Range der Y-Achse
+#   theme_classic() +                                       # weißer Hintergrund etc., gibt viele einfach ausprobieren, welches man möchte
+#   labs(x = 'Trialtype', y = 'Mittlere Reaktionszeit', title = "Mittlere Reaktionszeit") +
 #   theme(strip.background = element_blank(),
 #         strip.text= element_text(color= "black", size = 12),
 #         axis.text = element_text(color='black', size = 12),
@@ -83,6 +83,4 @@ Correct_sum <- Correct %>% group_by(trialtype, group) %>%
 #         legend.text = element_text(size = 12),
 #         legend.title = element_blank())
 # 
-# # Save for later use
-# write.table(Hits_sum_plot_All, '~/Desktop/Bachelor/Daten/R_Frames/Hits_sum_plot_All.txt', row.names = F, sep = '\t')
 # 
