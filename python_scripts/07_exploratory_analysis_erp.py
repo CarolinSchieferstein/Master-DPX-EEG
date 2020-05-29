@@ -115,6 +115,11 @@ b_cues = dict()
 a_erps = dict()
 b_erps = dict()
 
+a_erps_rew = dict()
+a_erps_no_rew = dict()
+b_erps_rew = dict()
+b_erps_no_rew = dict()
+
 # baseline to be applied
 baseline = (-0.300, -0.050)
 
@@ -135,10 +140,22 @@ for file in cue_files:
     a_erps['subj_%s' % subj] = a_cues['subj_%s' % subj].average()
     b_erps['subj_%s' % subj] = b_cues['subj_%s' % subj].average()
 
+    a_erps_rew['subj_%s' % subj] = a_cues['subj_%s' % subj]['reward == 1'].average()
+    a_erps_no_rew['subj_%s' % subj] = a_cues['subj_%s' % subj]['reward == 0'].average()
+
+    b_erps_rew['subj_%s' % subj] = b_cues['subj_%s' % subj]['reward == 1'].average()
+    b_erps_no_rew['subj_%s' % subj] = b_cues['subj_%s' % subj]['reward == 0'].average()
+
 ###############################################################################
 # 3) compute grand averages
 ga_a_cue = grand_average(list(a_erps.values()))
 ga_b_cue = grand_average(list(b_erps.values()))
+
+ga_a_rew = grand_average(list(a_erps_rew.values()))
+ga_b_rew = grand_average(list(b_erps_rew.values()))
+
+ga_a_norew = grand_average(list(a_erps_no_rew.values()))
+ga_b_norew = grand_average(list(b_erps_no_rew.values()))
 
 ###############################################################################
 # 4) plot global field power
@@ -185,6 +202,8 @@ ax.spines['right'].set_visible(False)
 ax.spines['left'].set_bounds(0, 4)
 ax.spines['bottom'].set_bounds(-0.25, 2.5)
 ax.xaxis.set_label_coords(0.5, -0.175)
+ax.axvline(x=2.0, ymin=-5, ymax=5,
+           color='black', linestyle='dashed', linewidth=.8)
 fig.subplots_adjust(bottom=0.2)
 fig.savefig(root_path + '/derivatives/results/GFP_evoked_cues.pdf', dpi=300)
 
@@ -307,3 +326,104 @@ for s, selection in enumerate(selections):
 
 # save figure
 fig.savefig(root_path + '/derivatives/results/Diff_A-B_image.pdf', dpi=300)
+
+
+###############################################################################
+# 6) plot compare Cue B and Cue A
+
+cis = within_subject_cis([a_erps, b_erps])
+
+for electrode in ['AF7', 'AF8', 'FCz', 'FC2', 'FC3', 'Cz', 'CPz', 'PO7','PO8']:
+    pick = ga_a_cue.ch_names.index(electrode)
+
+    fig, ax = plt.subplots(figsize=(8, 4))
+    plot_compare_evokeds({'Cue A': ga_a_cue.copy().crop(-0.25, 2.5),
+                          'Cue B': ga_b_cue.copy().crop(-0.25, 2.5)},
+                         vlines=[],
+                         picks=pick,
+                         invert_y=False,
+                         ylim=dict(eeg=[-8.5, 8.5]),
+                         colors={'Cue A': 'k', 'Cue B': 'crimson'},
+                         axes=ax,
+                         truncate_xaxis=False,
+                         show_sensors='upper right',
+                         show=False)
+    ax.axhline(y=0, xmin=-.25, xmax=2.5,
+               color='black', linestyle='dotted', linewidth=.8)
+    ax.axvline(x=0, ymin=-8.5, ymax=8.5,
+               color='black', linestyle='dotted', linewidth=.8)
+    ax.fill_between(ga_a_cue.times,
+                    (ga_a_cue.data[pick] + cis[0, pick, :]) * 1e6,
+                    (ga_a_cue.data[pick] - cis[0, pick, :]) * 1e6,
+                    alpha=0.2,
+                    color='k')
+    ax.fill_between(ga_b_cue.times,
+                    (ga_b_cue.data[pick] + cis[1, pick, :]) * 1e6,
+                    (ga_b_cue.data[pick] - cis[1, pick, :]) * 1e6,
+                    alpha=0.2,
+                    color='crimson')
+    ax.legend(loc='upper left', framealpha=1)
+    ax.set_xlabel('Time (s)', labelpad=10.0, fontsize=11.0)
+    ax.set_ylim(-8.5, 8.5)
+    ax.set_xticks(list(np.arange(-.25, 2.55, .25)), minor=False)
+    ax.set_yticks(list(np.arange(-8, 8.5, 2)), minor=False)
+    ax.set_xticklabels([str(lab) for lab in np.arange(-.25, 2.55, .25)],
+                       minor=False)
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
+    ax.spines['left'].set_bounds(-8, 8)
+    ax.spines['bottom'].set_bounds(-.25, 2.5)
+    ax.axvline(x=2.0, ymin=0, ymax=len(picks),
+               color='black', linestyle='dashed', linewidth=1.0)
+    fig.subplots_adjust(bottom=0.15)
+    fig.savefig(root_path + '/derivatives/results/ERP_AB_%s.pdf' % electrode,
+                dpi=300)
+
+
+cis_rew = within_subject_cis([a_erps_rew, b_erps_rew])
+
+for electrode in ['AF7', 'AF8', 'FCz', 'FC2', 'FC3', 'Cz', 'CPz', 'PO7', 'PO8']:
+    pick = ga_a_cue.ch_names.index(electrode)
+
+    fig, ax = plt.subplots(figsize=(8, 4))
+    plot_compare_evokeds({'Cue A': ga_a_rew.copy().crop(-0.25, 2.5),
+                          'Cue B': ga_b_rew.copy().crop(-0.25, 2.5)},
+                         vlines=[],
+                         picks=pick,
+                         invert_y=False,
+                         ylim=dict(eeg=[-8.5, 8.5]),
+                         colors={'Cue A': 'k', 'Cue B': 'crimson'},
+                         axes=ax,
+                         truncate_xaxis=False,
+                         show_sensors='upper right',
+                         show=False)
+    ax.axhline(y=0, xmin=-.25, xmax=2.5,
+               color='black', linestyle='dotted', linewidth=.8)
+    ax.axvline(x=0, ymin=-8.5, ymax=8.5,
+               color='black', linestyle='dotted', linewidth=.8)
+    ax.fill_between(ga_a_rew.times,
+                    (ga_a_rew.data[pick] + cis[0, pick, :]) * 1e6,
+                    (ga_a_rew.data[pick] - cis[0, pick, :]) * 1e6,
+                    alpha=0.2,
+                    color='k')
+    ax.fill_between(ga_b_rew.times,
+                    (ga_b_rew.data[pick] + cis[1, pick, :]) * 1e6,
+                    (ga_b_rew.data[pick] - cis[1, pick, :]) * 1e6,
+                    alpha=0.2,
+                    color='crimson')
+    ax.legend(loc='upper left', framealpha=1)
+    ax.set_xlabel('Time (s)', labelpad=10.0, fontsize=11.0)
+    ax.set_ylim(-8.5, 8.5)
+    ax.set_xticks(list(np.arange(-.25, 2.55, .25)), minor=False)
+    ax.set_yticks(list(np.arange(-8, 8.5, 2)), minor=False)
+    ax.set_xticklabels([str(lab) for lab in np.arange(-.25, 2.55, .25)],
+                       minor=False)
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
+    ax.spines['left'].set_bounds(-8, 8)
+    ax.spines['bottom'].set_bounds(-.25, 2.5)
+    ax.axvline(x=2.0, ymin=0, ymax=len(picks),
+               color='black', linestyle='dashed', linewidth=1.0)
+    fig.subplots_adjust(bottom=0.15)
+    fig.savefig(root_path + '/derivatives/results/ERP_rew_AB_%s.pdf' % electrode,
+                dpi=300)
