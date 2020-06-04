@@ -432,6 +432,14 @@ for file in files:
     # to data frame
     metadata = pd.DataFrame(metadata)
 
+    # add group info
+    if subj in {'001', '002', '003', '004', '005', '006', '007', '008',
+                '010', '011', '012', '013', '014', '015', '023', '025',
+                '027', '030', '031'}:
+        metadata = metadata.assign(group=0)
+    else:
+        metadata = metadata.assign(group=1)
+
     # --- 6) extract epochs ------------------------------------
     # pick channels to keep
     picks = pick_types(raw.info, eeg=True)
