@@ -78,34 +78,33 @@ all_sum <- merge(all_sum, total_trials, c("ID", "trialtype", "group", "reward"))
 # FEHLERRATE berechnen
 all_sum <- mutate(all_sum, FR = n_errors/total)
 
+# Incorrects dataframe
+Incorrect_sum_ID <- select(all_sum, ID:reward, m_rt_inc:FR)
 
-mod <- lmer(log(FR) ~ trialtype + (1|ID), data=all_sum)
-summary(mod)
-anova(mod)
-
-
-
-
-
-
-#######################################
-
-# Incorrect_sum mit Daten mit gezählten Trials zusammen
-Incorrect_sum <- merge(Incorrect_sum, total_trials, c("ID", "trialtype", "group", "reward"))
-
-# FEHLERRATE berechnen
-Incorrect_sum <- mutate(Incorrect_sum, FR = n/total)
 
 # Mittlere Fehlerrate und SE
-Incorrect_sum <- all_sum %>% dplyr::group_by(ID, trialtype, group, reward) %>%
-                                   dplyr::summarise(m_FR=mean(FR),
-                                                    se_FR=sd(FR)/sqrt(sum(!is.na(FR)))
-                                                    )
-# FEHLERRATE Plotten
+Incorrect_sum <- Incorrect_sum_ID %>% dplyr::group_by(trialtype, group, reward) %>%
+                                      dplyr::summarise(m_FR=mean(FR),
+                                                       se_FR=sd(FR)/sqrt(sum(!is.na(FR)))
+                                                       )
+# relevel trialtype
+levels(Incorrect_sum$trialtype)
+Incorrect_sum$trialtype <- relevel(Incorrect_sum$trialtype, ref = "AY")
+Incorrect_sum$trialtype <- relevel(Incorrect_sum$trialtype, ref = "BX")
+Incorrect_sum$trialtype <- relevel(Incorrect_sum$trialtype, ref = "AX")
+levels(Incorrect_sum$trialtype)
+
+# Plot
 require(ggplot2)
-Incorrect_plot <- ggplot(Incorrect_sum, aes(x=trialtype, y=m_FR)) + 
-                         geom_errorbar(aes(ymin=m_FR-se_FR, ymax=m_FR+se_FR), colour="black", width=.1, position=position_dodge(.5)) +
-                         geom_line(position=position_dodge(.5)) +
-                         geom_point(position=position_dodge(.5), size=3) +
-                         facet_grid(group ~ reward, scales = "free")
+
+Incorrect_sum$group <- factor(Incorrect_sum$group, labels = c("verzögert", "direkt"))
+Incorrect_sum$reward <- factor(Incorrect_sum$reward, labels = c("off", "on"))
+
+Incorrect_plot <- ggplot(Incorrect_sum, aes(x=trialtype, y=m_FR, group = 1, color = trialtype)) + 
+  geom_errorbar(aes(ymin=m_FR-se_FR, ymax=m_FR+se_FR), width=.1, position=position_dodge(.5)) +
+  geom_line(position=position_dodge(.5), color = "black") +
+  geom_point(position=position_dodge(.5), size=3) +
+  theme_light() +
+  facet_grid(group ~ reward, labeller = label_both)
+
 print(Incorrect_plot)

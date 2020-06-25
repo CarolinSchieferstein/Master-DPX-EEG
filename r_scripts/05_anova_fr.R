@@ -5,7 +5,7 @@
 # --- rt analysis for DPX R40
 # --- version: june 2020
 #
-# --- descriptive rt analysis
+# --- descriptive fr analysis
 
 # ========================================================================
 # -- Helper functions ----
@@ -30,48 +30,41 @@ rm(pkgs)
 
 
 # Variablen als Faktoren
-Correct_sum_ID$ID <- as.factor(Correct_sum_ID$ID)
-Correct_sum_ID$group <- as.factor(Correct_sum_ID$group)
-Correct_sum_ID$reward <- as.factor(Correct_sum_ID$reward)
-Correct_sum_ID$trialtype <- as.factor(Correct_sum_ID$trialtype)
-
+Incorrect_sum_ID$ID <- as.factor(Incorrect_sum_ID$ID)
+Incorrect_sum_ID$group <- as.factor(Incorrect_sum_ID$group)
+Incorrect_sum_ID$reward <- as.factor(Incorrect_sum_ID$reward)
+Incorrect_sum_ID$trialtype <- as.factor(Incorrect_sum_ID$trialtype)
 
 # Effektkodierung: Alle Trialtypen mit AX vergleichen
-levels(Correct_sum_ID$trialtype)
-Correct_sum_ID$trialtype <- relevel(Correct_sum_ID$trialtype, ref = "BY")
-Correct_sum_ID$trialtype <- relevel(Correct_sum_ID$trialtype, ref = "BX")
-Correct_sum_ID$trialtype <- relevel(Correct_sum_ID$trialtype, ref = "AY")      #Trialtypen in levels ordnen, letztes als Referenz
-levels(Correct_sum_ID$trialtype)
+levels(Incorrect_sum_ID$trialtype)
+Incorrect_sum_ID$trialtype <- relevel(Incorrect_sum_ID$trialtype, ref = "BY")
+Incorrect_sum_ID$trialtype <- relevel(Incorrect_sum_ID$trialtype, ref = "BX")
+Incorrect_sum_ID$trialtype <- relevel(Incorrect_sum_ID$trialtype, ref = "AY")      #Trialtypen in levels ordnen, letztes als Referenz
+levels(Incorrect_sum_ID$trialtype)
+contrasts(Incorrect_sum_ID$trialtype) <- contr.sum(4); contrasts(Incorrect_sum_ID$trialtype)
+hist(Incorrect_sum_ID$FR)
 
-contrasts(Correct_sum_ID$trialtype) <- contr.sum(4); contrasts(Correct_sum_ID$trialtype)
-contrasts(Correct_sum_ID$reward) <- contr.sum(2); contrasts(Correct_sum_ID$reward)
-contrasts(Correct_sum_ID$group) <- contr.sum(2); contrasts(Correct_sum_ID$group)
+contrasts(Incorrect_sum_ID$reward) <- contr.sum(2); contrasts(Incorrect_sum_ID$reward)
+contrasts(Incorrect_sum_ID$group) <- contr.sum(2); contrasts(Incorrect_sum_ID$group)
+
+# Anova
 options(contrasts = c("contr.sum", "contr.poly"))
+inc_mod <- lmer(log(FR) ~ trialtype*reward*group + (1|ID), data=Incorrect_sum_ID)
+summary(inc_mod)
+anova(inc_mod)
+car::Anova(inc_mod, test = "F")
+car::qqPlot(resid((inc_mod)))
 
-hist(Correct_sum_ID$m_rt_hit)
-
-
-corr_mod <- lmer(m_rt_hit ~ trialtype*reward*group + (1|ID), data=Correct_sum_ID)
-summary(corr_mod)
-anova(corr_mod)
-car::Anova(corr_mod, test = "F")
-car::qqPlot(resid((corr_mod)))
-
-sjPlot::plot_model(corr_mod, "int")
+sjPlot::plot_model(inc_mod, "int")
 
 
-
-
-
-
-
-
+##############
 
 # Modell direkt auf Daten ohne summary
 require(lmerTest)
 
 # Modell mit contrasts direkt drin
-rt_mod_log <- lm(log(m_rt_hit) ~ trialtype*group*reward, data = Correct_sum_ID,
+fr_mod_log <- lm(log(m_rt_hit) ~ trialtype*group*reward, data = Correct_sum_ID,
                  contrasts=list(trialtype = 'contr.sum',
                                 reward = 'contr.sum',
                                 group = 'contr.sum'))

@@ -43,7 +43,7 @@ write.table(Missed, '/run/media/carolin/2672-DC99/dpx_r40/Missed.txt', row.names
 write.table(Too_soon, '/run/media/carolin/2672-DC99/dpx_r40/Too_soon.txt', row.names = F, sep = '\t')
 
 
-# COMPUTE DESCRIPTIVE STATISTICS----
+# PLOT DESCRIPTIVE STATISTICS----
 
 # Hits rauslesen, group_by Trialtype , group aufteilen, + summarise
 Correct_sum <- Correct %>% group_by(trialtype, group, reward) %>% 
@@ -52,11 +52,18 @@ Correct_sum <- Correct %>% group_by(trialtype, group, reward) %>%
                                      se_rt = sd(rt)/sqrt(sum(!is.na(rt))),
                                      n = sum(!is.na(rt)))
 
+# Plot
 require(ggplot2)
-Correct_plot <- ggplot(Correct_sum, aes(x=trialtype, y=m_rt)) +
-  geom_errorbar(aes(ymin=m_rt-se_rt, ymax=m_rt+se_rt), colour="black", width=.1, position=position_dodge(.5)) +
-  geom_line(position=position_dodge(.5)) +
+
+Correct_sum$group <- factor(Correct_sum$group, labels = c("verzögert", "direkt"))
+Correct_sum$reward <- factor(Correct_sum$reward, labels = c("off", "on"))
+
+Correct_plot <- ggplot(Correct_sum, aes(x=trialtype, y=m_rt, group = 1, color= trialtype)) +
+  geom_errorbar(aes(ymin=m_rt-se_rt, ymax=m_rt+se_rt), width=.1, position=position_dodge(.5)) +
+  geom_line(position=position_dodge(.5), color = "black") +
   geom_point(position=position_dodge(.5), size=3) + 
-  facet_grid(group ~ reward, scales = "free", space = "free")
+  theme_light() +
+  facet_grid(group ~ reward, labeller = label_both)
 
 print(Correct_plot)
+
