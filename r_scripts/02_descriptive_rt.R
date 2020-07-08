@@ -44,7 +44,6 @@ write.table(Too_soon, '/run/media/carolin/2672-DC99/dpx_r40/Too_soon.txt', row.n
 
 
 # PLOT DESCRIPTIVE STATISTICS----
-
 # Hits rauslesen, group_by Trialtype , group aufteilen, + summarise
 Correct_sum <- Correct %>% group_by(trialtype, group, reward) %>% 
                            summarise(m_rt = mean(rt),
@@ -66,4 +65,3 @@ Correct_plot <- ggplot(Correct_sum, aes(x=trialtype, y=m_rt, group = 1, color= t
   facet_grid(group ~ reward, labeller = label_both)
 
 print(Correct_plot)
-

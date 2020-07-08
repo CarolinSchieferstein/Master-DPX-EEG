@@ -108,3 +108,4 @@ Incorrect_plot <- ggplot(Incorrect_sum, aes(x=trialtype, y=m_FR, group = 1, colo
   facet_grid(group ~ reward, labeller = label_both)
 
 print(Incorrect_plot)
+
