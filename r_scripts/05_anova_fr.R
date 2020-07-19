@@ -1,6 +1,6 @@
 # --- carolin schieferstein & jose c. garcia alanis
 # --- utf-8
-# --- R 4.0.0
+# --- R 4.0.1
 #
 # --- rt analysis for DPX R40
 # --- version: june 2020

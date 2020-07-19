@@ -1,6 +1,6 @@
 # --- carolin schieferstein & jose c. garcia alanis
 # --- utf-8
-# --- R 3.6.3
+# --- R 4.0.1
 #
 # --- fb analysis for DPX R40
 # --- version: may 2020
@@ -110,3 +110,4 @@ ggplot(fb_plot, aes(x = fb, y = value, fill = fb)) +
   scale_y_continuous(breaks = seq(10,90,10)) +
   scale_fill_viridis(option = "D", discrete = TRUE) +
   facet_wrap(~group)
+

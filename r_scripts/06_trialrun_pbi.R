@@ -1,6 +1,6 @@
 # --- carolin schieferstein & jose c. garcia alanis
 # --- utf-8
-# --- R 4.0.0
+# --- R 4.0.1
 #
 # --- rt analysis for DPX R40
 # --- version: july 2020
@@ -35,6 +35,11 @@ Correct_run <- rbind(Correct_run_long, Correct_run_short)
 # Plot
 require(ggplot2)
 
+Correct_run$reward <- as.factor(Correct_run$reward)
+Correct_run$group <- as.factor(Correct_run$group)
+Correct_run$ax_run <- as.factor(Correct_run$ax_run)
+
+# absichern, dass plyr VOR dplyr geladen wird, ansonsten detach(package:plyr) und n ochmal versuchen
 Correct_run_sum <- Correct_run %>% group_by(group, reward, ax_run) %>% 
   summarise(m_rt = mean(rt),
             sd_rt = sd(rt),
@@ -102,10 +107,31 @@ pbi_plot <- pbi_rt %>% group_by(group, reward) %>%
             se_pbi = sd(pbi_rt)/sqrt(sum(!is.na(pbi_rt))),
             n = sum(!is.na(pbi_rt)))
 
-pbi_plot <- ggplot(pbi_plot, aes(x = group, y = pbi_rt, group = 1, color= reward)) +
+pbi_plot$group <- as.factor(pbi_plot$group)
+
+pbi_p <- ggplot(pbi_plot, aes(x = group, y = m_pbi, group = 1)) +
+  geom_errorbar(aes(ymin = m_pbi - se_pbi, ymax = m_pbi + se_pbi), width = .1, position = position_dodge(.5)) +
   geom_line(position=position_dodge(.5), color = "black") +
   geom_point(position=position_dodge(.5), size=3) + 
   theme_light() +
   facet_grid( ~ reward)
 
-print(pbi_plot)
+print(pbi_p)
+
+
+pbi_fr_plot <- pbi_fr %>% group_by(group, reward) %>%
+  summarise(m_pbi = mean(pbi_fr),
+            sd_pbi = sd(pbi_fr),
+            se_pbi = sd(pbi_fr)/sqrt(sum(!is.na(pbi_fr))),
+            n = sum(!is.na(pbi_fr)))
+
+pbi_fr_plot$group <- as.factor(pbi_fr_plot$group)
+
+pbi_p_fr <- ggplot(pbi_fr_plot, aes(x = group, y = m_pbi, group = 1)) +
+  geom_errorbar(aes(ymin = m_pbi - se_pbi, ymax = m_pbi + se_pbi), width = .1, position = position_dodge(.5)) +
+  geom_line(position=position_dodge(.5), color = "black") +
+  geom_point(position=position_dodge(.5), size=3) + 
+  theme_light() +
+  facet_grid( ~ reward)
+
+print(pbi_p_fr)
