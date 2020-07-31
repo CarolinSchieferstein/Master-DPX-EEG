@@ -32,10 +32,14 @@ else:
 data_path = op.join(root_path, 'derivatives/epochs')
 # output path
 output_path = op.join(root_path, 'derivatives/rt')
+output_path_amp = op.join(root_path, 'derivatives/amp')
 
 # create directory for save
 if not op.isdir(op.join(output_path)):
     mkdir(op.join(output_path))
+
+if not op.isdir(op.join(output_path_amp)):
+    mkdir(op.join(output_path_amp))
 
 # files to be analysed
 
@@ -58,13 +62,47 @@ for file in files:
     # add subject id
     rt = rt.assign(subject=subj)
 
+    # --- 4) export rois
+    cue_epochs = cue_epochs.apply_baseline((-0.300, -0.050))
+
+    df = cue_epochs.to_data_frame(long_format=True)
+
+    # get tim rois
+    n170 = df[((df["time"] >= 100) & (df["time"] <= 200))
+              & ((df["channel"] == 'PO8') | (df["channel"] == 'PO7'))]
+    n170 = n170.assign(subject=subj)
+
+    p300 = df[((df["time"] >= 250) & (df["time"] <= 500))
+              & ((df["channel"] == 'Pz') | (df["channel"] == 'CPz'))]
+    p300 = p300.assign(subject=subj)
+
+    cnv = df[((df["time"] >= 900) & (df["time"] <= 1500))
+             & (df["channel"] == 'FC2')]
+    cnv = cnv.assign(subject=subj)
+
     # --- 4) Save file -----------------------------------------
     # create directory for save
     if not op.exists(op.join(output_path, 'sub-%s' % subj)):
         mkdir(op.join(output_path, 'sub-%s' % subj))
+
+    if not op.exists(op.join(output_path_amp, 'sub-%s' % subj)):
+        mkdir(op.join(output_path_amp, 'sub-%s' % subj))
 
     # save to disk
     rt.to_csv(op.join(output_path, 'sub-%s' % subj,
                       'sub-%s-rt.tsv' % subj),
               sep='\t',
               index=False)
+
+    n170.to_csv(op.join(output_path_amp, 'sub-%s' % subj,
+                        'sub-%s-n170.tsv' % subj),
+                sep='\t',
+                index=False)
+    p300.to_csv(op.join(output_path_amp, 'sub-%s' % subj,
+                        'sub-%s-p300.tsv' % subj),
+                sep='\t',
+                index=False)
+    cnv.to_csv(op.join(output_path_amp, 'sub-%s' % subj,
+                       'sub-%s-cnv.tsv' % subj),
+               sep='\t',
+               index=False)

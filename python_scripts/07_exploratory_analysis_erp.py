@@ -115,10 +115,20 @@ b_cues = dict()
 a_erps = dict()
 b_erps = dict()
 
-a_erps_rew = dict()
-a_erps_no_rew = dict()
-b_erps_rew = dict()
-b_erps_no_rew = dict()
+# a_erps_rew = dict()
+# a_erps_no_rew = dict()
+# b_erps_rew = dict()
+# b_erps_no_rew = dict()
+
+a_erps_rew_g0 = dict()
+a_erps_no_rew_g0 = dict()
+b_erps_rew_g0 = dict()
+b_erps_no_rew_g0 = dict()
+
+a_erps_rew_g1 = dict()
+a_erps_no_rew_g1 = dict()
+b_erps_rew_g1 = dict()
+b_erps_no_rew_g1 = dict()
 
 # baseline to be applied
 baseline = (-0.300, -0.050)
@@ -140,22 +150,58 @@ for file in cue_files:
     a_erps['subj_%s' % subj] = a_cues['subj_%s' % subj].average()
     b_erps['subj_%s' % subj] = b_cues['subj_%s' % subj].average()
 
-    a_erps_rew['subj_%s' % subj] = a_cues['subj_%s' % subj]['reward == 1'].average()
-    a_erps_no_rew['subj_%s' % subj] = a_cues['subj_%s' % subj]['reward == 0'].average()
+    # a_erps_rew['subj_%s' % subj] = a_cues['subj_%s' % subj]['reward == 1'].average()
+    # a_erps_no_rew['subj_%s' % subj] = a_cues['subj_%s' % subj]['reward == 0'].average()
+    #
+    # b_erps_rew['subj_%s' % subj] = b_cues['subj_%s' % subj]['reward == 1'].average()
+    # b_erps_no_rew['subj_%s' % subj] = b_cues['subj_%s' % subj]['reward == 0'].average()
 
-    b_erps_rew['subj_%s' % subj] = b_cues['subj_%s' % subj]['reward == 1'].average()
-    b_erps_no_rew['subj_%s' % subj] = b_cues['subj_%s' % subj]['reward == 0'].average()
+    if subj in {'001', '002', '003', '004', '005', '006', '007', '008',
+                '010', '011', '012', '013', '014', '015', '023', '025',
+                '027', '030', '031'}:
+
+        a_erps_rew_g0['subj_%s' % subj] = \
+            a_cues['subj_%s' % subj]['reward == 1'].average()
+        a_erps_no_rew_g0['subj_%s' % subj] = \
+            a_cues['subj_%s' % subj]['reward == 0'].average()
+
+        b_erps_rew_g0['subj_%s' % subj] = \
+            b_cues['subj_%s' % subj]['reward == 1'].average()
+        b_erps_no_rew_g0['subj_%s' % subj] = \
+            b_cues['subj_%s' % subj]['reward == 0'].average()
+
+    else:
+
+        a_erps_rew_g1['subj_%s' % subj] = \
+            a_cues['subj_%s' % subj]['reward == 1'].average()
+        a_erps_no_rew_g1['subj_%s' % subj] = \
+            a_cues['subj_%s' % subj]['reward == 0'].average()
+
+        b_erps_rew_g1['subj_%s' % subj] = \
+            b_cues['subj_%s' % subj]['reward == 1'].average()
+        b_erps_no_rew_g1['subj_%s' % subj] = \
+            b_cues['subj_%s' % subj]['reward == 0'].average()
 
 ###############################################################################
 # 3) compute grand averages
 ga_a_cue = grand_average(list(a_erps.values()))
 ga_b_cue = grand_average(list(b_erps.values()))
 
-ga_a_rew = grand_average(list(a_erps_rew.values()))
-ga_b_rew = grand_average(list(b_erps_rew.values()))
+a_rew = list(a_erps_rew_g0.values())
+a_rew.extend(list(a_erps_rew_g1.values()))
+ga_a_rew = grand_average(a_rew)
 
-ga_a_norew = grand_average(list(a_erps_no_rew.values()))
-ga_b_norew = grand_average(list(b_erps_no_rew.values()))
+b_rew = list(b_erps_rew_g0.values())
+b_rew.extend(list(b_erps_rew_g1.values()))
+ga_b_rew = grand_average(b_rew)
+
+a_norew = list(a_erps_no_rew_g0.values())
+a_norew.extend(list(a_erps_no_rew_g1.values()))
+ga_a_norew = grand_average(a_norew)
+
+b_norew = list(b_erps_no_rew_g0.values())
+b_norew.extend(list(b_erps_no_rew_g1.values()))
+ga_b_norew = grand_average(b_norew)
 
 ###############################################################################
 # 4) plot global field power
@@ -333,7 +379,8 @@ fig.savefig(root_path + '/derivatives/results/Diff_A-B_image.pdf', dpi=300)
 
 cis = within_subject_cis([a_erps, b_erps])
 
-for electrode in ['AF7', 'AF8', 'FCz', 'FC2', 'FC3', 'Cz', 'CPz', 'PO7','PO8']:
+for electrode in ['AF7', 'AF8', 'FCz', 'FC2', 'FC3', 'Cz', 'Pz',
+                  'CPz', 'PO7', 'PO8']:
     pick = ga_a_cue.ch_names.index(electrode)
 
     fig, ax = plt.subplots(figsize=(8, 4))
