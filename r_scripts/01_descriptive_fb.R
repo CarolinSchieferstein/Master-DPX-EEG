@@ -90,7 +90,7 @@ fb_plot$group <- factor(fb_plot$group, labels = c("verzögert", "direkt"))
 
 fb_plot$fb <- as.factor(fb_plot$fb)
 levels(fb_plot$fb)
-fb_plot$fb <- factor(fb_plot$fb,levels(fb_plot$fb)[c(5,1,6,3,8,7,4,9,2)])
+fb_plot$fb <- factor(fb_plot$fb,levels(fb_plot$fb)[c(9,8,7,6,2,4,3,1,5)])
 levels(fb_plot$fb)
 
 require(ggplot2)

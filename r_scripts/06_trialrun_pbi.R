@@ -25,8 +25,6 @@ Correct_run_long <- Correct %>% group_by(group, reward) %>%
   filter( ifelse(lag(trialrun) == 2 , (trialtype == "AY" & lag(trialtype) == "AX"), NA ) ) %>%
   mutate(ax_run = 2)
 
-# ay_lag_nax <- Correct %>% group_by(group, reward) %>%
-#   filter( ifelse(!lag(trialtype) == "AX" , (trialtype == "AY" & lag(trialtype) == "AX"), NA ) )
 
 # ----- 2) Model short vs long run ---------------------
 
@@ -109,7 +107,8 @@ pbi_plot <- pbi_rt %>% group_by(group, reward) %>%
 
 pbi_plot$group <- as.factor(pbi_plot$group)
 
-pbi_p <- ggplot(pbi_plot, aes(x = group, y = m_pbi, group = 1)) +
+
+pbi_p <- ggplot(pbi_plot, aes(x = group, y = m_pbi, group = 1, colour = group)) +
   geom_errorbar(aes(ymin = m_pbi - se_pbi, ymax = m_pbi + se_pbi), width = .1, position = position_dodge(.5)) +
   geom_line(position=position_dodge(.5), color = "black") +
   geom_point(position=position_dodge(.5), size=3) + 
@@ -127,7 +126,7 @@ pbi_fr_plot <- pbi_fr %>% group_by(group, reward) %>%
 
 pbi_fr_plot$group <- as.factor(pbi_fr_plot$group)
 
-pbi_p_fr <- ggplot(pbi_fr_plot, aes(x = group, y = m_pbi, group = 1)) +
+pbi_p_fr <- ggplot(pbi_fr_plot, aes(x = group, y = m_pbi, group = 1, colour = group)) +
   geom_errorbar(aes(ymin = m_pbi - se_pbi, ymax = m_pbi + se_pbi), width = .1, position = position_dodge(.5)) +
   geom_line(position=position_dodge(.5), color = "black") +
   geom_point(position=position_dodge(.5), size=3) + 

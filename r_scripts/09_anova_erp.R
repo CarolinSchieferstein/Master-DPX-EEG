@@ -139,11 +139,28 @@ CNV_sum$cue <- as.factor(CNV_sum$cue)
 CNV_sum$channel <- as.factor(CNV_sum$channel)
 
 # nur cue = A und cue = B vergleichen (corrects)
-N170_sum_x <- filter(N170_sum, cue == c("A", "B"))      ?????????????????????????????????
-P300_sum_x <- filter(P300_sum, cue == c("A", "B"))      ?????????????????????????????????
-CNV_sum_x <- filter(CNV_sum, cue == c("A", "B"))        ?????????????????????????????????
+N170_sum <- filter(N170_sum, cue %in% c("A", "B"))
+P300_sum <- filter(P300_sum, cue %in% c("A", "B"))
+CNV_sum <- filter(CNV_sum, cue %in% c("A", "B"))
 
+# zwischenspeichern
+write.table(N170_sum, '/run/media/carolin/2672-DC99/dpx_r40/N170_sum.txt', row.names = F, sep = '\t')
+write.table(P300_sum, '/run/media/carolin/2672-DC99/dpx_r40/P300_sum.txt', row.names = F, sep = '\t')
+write.table(CNV_sum, '/run/media/carolin/2672-DC99/dpx_r40/CNV_sum.txt', row.names = F, sep = '\t')
+N170_sum <- read.table('/run/media/carolin/2672-DC99/dpx_r40/N170_sum.txt', header = T)
+P300_sum <- read.table('/run/media/carolin/2672-DC99/dpx_r40/P300_sum.txt', header = T)
+CNV_sum <- read.table('/run/media/carolin/2672-DC99/dpx_r40/CNV_sum.txt', header = T)
 
+# as.factor
+N170_sum$cue <- as.factor(N170_sum$cue)
+P300_sum$cue <- as.factor(P300_sum$cue)
+CNV_sum$cue <- as.factor(CNV_sum$cue)
+N170_sum$channel <- as.factor(N170_sum$channel)
+P300_sum$channel <- as.factor(P300_sum$channel)
+CNV_sum$channel <- as.factor(CNV_sum$channel)
+N170_sum$group <- as.factor(N170_sum$group)
+P300_sum$group <- as.factor(P300_sum$group)
+CNV_sum$group <- as.factor(CNV_sum$group)
 
 # Effektkodierung cues
 levels(N170_sum$cue)  # letztes Level dient als Referenkategorie
@@ -161,7 +178,6 @@ contrasts(P300_sum$group) <- contr.sum(2); contrasts(P300_sum$group)
 options(contrasts = c("contr.sum", "contr.poly"))
 
 contrasts(CNV_sum$cue) <- contr.sum(2); contrasts(CNV_sum$cue)
-contrasts(CNV_sum$channel) <- contr.sum(2); contrasts(CNV_sum$channel)
 contrasts(CNV_sum$group) <- contr.sum(2); contrasts(CNV_sum$group)
 options(contrasts = c("contr.sum", "contr.poly"))
 
@@ -176,7 +192,8 @@ anova(N170_mod)
 car::Anova(N170_mod, test = "F")
 car::qqPlot(resid((N170_mod)))
 
-sjPlot::plot_model(corr_mod, "int")
+sjPlot::plot_model(N170_mod, "int")
+
 
 
 P300_mod <- lmer(m_erp ~ cue*channel*group + (1|ID), data=P300_sum)
@@ -188,17 +205,11 @@ car::qqPlot(resid((P300_mod)))
 sjPlot::plot_model(P300_mod, "int")
 
 
-CNV_mod <- lmer(m_erp ~ cue*channel*group + (1|ID), data=CNV_sum)
+
+CNV_mod <- lmer(m_erp ~ cue*group + (1|ID), data=CNV_sum)
 summary(CNV_mod)
 anova(CNV_mod)
 car::Anova(CNV_mod, test = "F")
 car::qqPlot(resid((CNV_mod)))
 
 sjPlot::plot_model(CNV_mod, "int")
-
-
-
-
-
-
-

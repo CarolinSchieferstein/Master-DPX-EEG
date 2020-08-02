@@ -11,7 +11,7 @@
 # ------------------- import relevant extensions ------------------------- 
 
 # -- Helper functions ----
-pkgs <- c('dplyr', 'plyr', 
+pkgs <- c('plyr', 'dplyr', 
           'emmeans', 'car', 'sjstats', 'ggplot2', 'lmerTest')
 getPacks(pkgs)
 rm(pkgs)
@@ -119,7 +119,10 @@ options(contrasts = c("contr.sum", "contr.poly"))
 hist(pbi_on_rt$m_rt)
 
 # ANOVA-Modell
-pbi_rt_mod <- lmer(pbi_rt ~ reward+group + (1|ID), data=pbi_rt) # random part (1|ID) überfittet -> singular fit d.h. Zellen sind zu ähnlich 
+# pbi_rt_mod <- lmer(pbi_rt ~ reward+group + (1|ID), data=pbi_rt) # random part (1|ID) überfittet -> singular fit
+                                                                # d.h. Zellen sind zu ähnlich, Werte zwischen Personen sollten
+                                                                # unterschiedlicher sein als intraindividuell hier aber
+                                                                # scheinbar nicht und daher keine Varianzaufklärung dadurch
 pbi_rt_mod <- lm(pbi_rt~ reward*group, data = pbi_rt)
 summary(pbi_rt_mod)
 anova(pbi_rt_mod)
@@ -142,7 +145,7 @@ options(contrasts = c("contr.sum", "contr.poly"))
 hist(pbi_fr$pbi_fr)
 
 # ANOVA-Modell
-pbi_fr_mod <- lmer(pbi_fr ~ reward*group + (1|ID), data=pbi_fr) # random part (1|ID) überfittet -> singular fit
+# pbi_fr_mod <- lmer(pbi_fr ~ reward*group + (1|ID), data=pbi_fr) # random part (1|ID) überfittet -> singular fit
                                                                 # d.h. Zellen sind zu ähnlich, Werte zwischen Personen sollten
                                                                 # unterschiedlicher sein als intraindividuell hier aber
                                                                 # scheinbar nicht und daher keine Varianzaufklärung dadurch
@@ -153,4 +156,3 @@ car::Anova(pbi_fr_mod, test = "F")
 car::qqPlot(resid((pbi_fr_mod)))
 
 sjPlot::plot_model(pbi_fr_mod, "int")
-

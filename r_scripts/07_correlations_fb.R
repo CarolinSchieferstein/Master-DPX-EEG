@@ -63,7 +63,7 @@ corrplot(FB_RT_corr_plot$r, p.mat = FB_RT_corr_plot$p,
          #order = "hclust",
          addrect = 3,
          type = 'upper',
-         #addCoef.col = "black", 
+         addCoef.col = "black", 
          #sig.level = 0.05, 
          tl.col = "black", 
          tl.srt = 90,
@@ -91,7 +91,7 @@ corrplot(FB_FR_corr_plot$r, p.mat = FB_FR_corr_plot$p,
          method = "circle", 
          number.cex = 1, 
          type = 'upper',
-         #addCoef.col = "black", 
+         addCoef.col = "black", 
          #sig.level = 0.05, 
          tl.col = "black", 
          tl.srt = 90,
@@ -233,5 +233,136 @@ corrplot(FB_FR_corr_plot1$r, p.mat = FB_FR_corr_plot1$p,
 
 
 # ----- 5) Compute correlations with PBI ---------------------
+# dataframe PBI
+pbi_rt_corr <- pbi_rt
+pbi_fr_corr <- pbi_fr
+
+pbi_rt_corr <- reshape2::dcast(pbi_rt_corr, ID + group ~ reward, value.var="pbi_rt")
+pbi_fr_corr <- reshape2::dcast(pbi_fr_corr, ID + group ~ reward, value.var="pbi_fr")
 
 
+# FB
+FB_corr <- select(fb, ID, BI:DK)
+
+# merge
+FB_PBI_rt_corr <- merge(FB_corr, pbi_rt_corr, "ID")
+names(FB_PBI_rt_corr)[12:13] <- c("PBI 0", "PBI 1")
+
+FB_PBI_fr_corr <- merge(FB_corr, pbi_fr_corr, "ID")
+names(FB_PBI_fr_corr)[12:13] <- c("PBI 0", "PBI 1")
+
+
+## Reaktionszeiten
+require(psych)
+FB_PBI_rt_corr0 <- filter(FB_PBI_rt_corr, group == "0")
+FB_PBI_rt_corr1 <- filter(FB_PBI_rt_corr, group == "1")
+
+FB_PBI_rt_corr0_plot <- corr.test(FB_PBI_rt_corr0[, -c(1,11)], adjust = 'none')
+diag(FB_PBI_rt_corr0_plot$r) = NA
+diag(FB_PBI_rt_corr0_plot$p) = NA
+
+
+FB_PBI_rt_corr1_plot <- corr.test(FB_PBI_rt_corr1[, -c(1,11)], adjust = 'none')
+diag(FB_PBI_rt_corr1_plot$r) = NA
+diag(FB_PBI_rt_corr1_plot$p) = NA
+
+
+# Plot
+require(corrplot)
+require(RColorBrewer)
+corrplot(FB_PBI_rt_corr0_plot$r, p.mat = FB_PBI_rt_corr0_plot$p,
+         col = rev(colorRampPalette(brewer.pal(11,'RdBu'))(20)),
+         method = "circle", 
+         number.cex = 1,
+         #order = "hclust",
+         addrect = 3,
+         type = 'upper',
+         addCoef.col = "black", 
+         #sig.level = 0.05, 
+         tl.col = "black", 
+         tl.srt = 90,
+         mar = c(1, 0, 2, 1),
+         addgrid.col =  NA,
+         insig = "label_sig",
+         sig.level = c(.001, .01, .05), pch.cex = 1.5, 
+         pch.col = "white", 
+         na.label.col = NA, 
+         na.label = NA, 
+         cl.ratio = .25, cl.length = 11, cl.cex = 1)
+
+corrplot(FB_PBI_rt_corr1_plot$r, p.mat = FB_PBI_rt_corr1_plot$p,
+         col = rev(colorRampPalette(brewer.pal(11,'RdBu'))(20)),
+         method = "circle", 
+         number.cex = 1,
+         #order = "hclust",
+         addrect = 3,
+         type = 'upper',
+         addCoef.col = "black", 
+         #sig.level = 0.05, 
+         tl.col = "black", 
+         tl.srt = 90,
+         mar = c(1, 0, 2, 1),
+         addgrid.col =  NA,
+         insig = "label_sig",
+         sig.level = c(.001, .01, .05), pch.cex = 1.5, 
+         pch.col = "white", 
+         na.label.col = NA, 
+         na.label = NA, 
+         cl.ratio = .25, cl.length = 11, cl.cex = 1)
+
+## Fehlerraten
+require(psych)
+FB_PBI_fr_corr0 <- filter(FB_PBI_fr_corr, group == "0")
+FB_PBI_fr_corr1 <- filter(FB_PBI_fr_corr, group == "1")
+
+FB_PBI_fr_corr0_plot <- corr.test(FB_PBI_fr_corr0[, -c(1,11)], adjust = 'none')
+diag(FB_PBI_fr_corr0_plot$r) = NA
+diag(FB_PBI_fr_corr0_plot$p) = NA
+
+FB_PBI_fr_corr1_plot <- corr.test(FB_PBI_fr_corr1[, -c(1,11)], adjust = 'none')
+diag(FB_PBI_fr_corr1_plot$r) = NA
+diag(FB_PBI_fr_corr1_plot$p) = NA
+
+
+# Plot
+require(corrplot)
+require(RColorBrewer)
+corrplot(FB_PBI_fr_corr0_plot$r, p.mat = FB_PBI_fr_corr0_plot$p,
+         col = rev(colorRampPalette(brewer.pal(11,'RdBu'))(20)),
+         method = "circle", 
+         number.cex = 1,
+         #order = "hclust",
+         addrect = 3,
+         type = 'upper',
+         addCoef.col = "black", 
+         #sig.level = 0.05, 
+         tl.col = "black", 
+         tl.srt = 90,
+         mar = c(1, 0, 2, 1),
+         addgrid.col =  NA,
+         insig = "label_sig",
+         sig.level = c(.001, .01, .05), pch.cex = 1.5, 
+         pch.col = "white", 
+         na.label.col = NA, 
+         na.label = NA, 
+         cl.ratio = .25, cl.length = 11, cl.cex = 1)
+
+corrplot(FB_PBI_fr_corr1_plot$r, p.mat = FB_PBI_fr_corr1_plot$p,
+         col = rev(colorRampPalette(brewer.pal(11,'RdBu'))(20)),
+         method = "circle", 
+         number.cex = 1,
+         #order = "hclust",
+         addrect = 3,
+         type = 'upper',
+         addCoef.col = "black", 
+         #sig.level = 0.05, 
+         tl.col = "black", 
+         tl.srt = 90,
+         mar = c(1, 0, 2, 1),
+         addgrid.col =  NA,
+         insig = "label_sig",
+         sig.level = c(.001, .01, .05), pch.cex = 1.5, 
+         pch.col = "white", 
+         na.label.col = NA, 
+         na.label = NA, 
+         cl.ratio = .25, cl.length = 11, cl.cex = 1)

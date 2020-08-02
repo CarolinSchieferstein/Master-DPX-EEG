@@ -88,6 +88,7 @@ Incorrect_sum <- Incorrect_sum_ID %>% dplyr::group_by(trialtype, group, reward) 
                                                        se_FR=sd(FR)/sqrt(sum(!is.na(FR)))
                                                        )
 # relevel trialtype
+Incorrect_sum$trialtype <- as.factor(Incorrect_sum$trialtype)
 levels(Incorrect_sum$trialtype)
 Incorrect_sum$trialtype <- relevel(Incorrect_sum$trialtype, ref = "AY")
 Incorrect_sum$trialtype <- relevel(Incorrect_sum$trialtype, ref = "BX")
@@ -108,4 +109,3 @@ Incorrect_plot <- ggplot(Incorrect_sum, aes(x=trialtype, y=m_FR, group = 1, colo
   facet_grid(group ~ reward, labeller = label_both)
 
 print(Incorrect_plot)
-
