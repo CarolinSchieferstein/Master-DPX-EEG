@@ -1,0 +1,568 @@
+#------------VARIABLEN fuer  SUBS----------------------------------------
+include "DPX_Caro_Stimulist.pcl";
+
+array <int> dpx_rz[100];
+array <int> min_dpx_rz[100];
+string Rtype;
+string min_Rtype;
+
+output_port parallel = output_port_manager.get_port( 1);
+
+##############			Helper Subs			##############
+
+
+##############		BIOSEMI STEUERUNG		##############
+
+sub Biosemi (int start_stopp) 		# 0 = Stopp, 1 = start
+begin
+   if (start_stopp == 1) then     
+		wait_interval(100);
+      parallel.send_code(126, 5); 
+		wait_interval(100);
+		DR_START.present(); 				# Logfile-Eintrag zeitgleich mit DR-Start
+		parallel.send_code(127, 5);
+		wait_interval(300);
+		display_window.set_background_color (255, 193 , 193);
+      display_window.erase();
+   else
+		wait_interval(100);
+		parallel.send_code(245, 5);
+		wait_interval(300);
+		DR_STOPP.present(); 				# zum Generieren von Logfile-Einträgen zeitgleich mit DR-Ende
+		wait_interval(1000); 			# kleine Pause, damit am Ende des DRs nichts abgeschnitten wird
+		parallel.send_code(255, 5); 	# Biosemi stoppen
+		display_window.set_background_color (193, 193 , 193);
+      display_window.erase();
+	end;
+end; 											# END OF BIOSEMI STEUERUNG
+
+
+##############			Display 			##############
+
+sub anzeigen (string ausgabetext, int farbe)
+begin
+   if (farbe == 1) then display_window.set_text_color (0, 0, 0);  # 0=grün, 1=rot
+   else display_window.set_text_color (47, 79, 79); end;
+		display_window.erase();
+		display_window.draw_text(ausgabetext);
+end; # of procedure
+
+################################################ RUHE
+
+sub ruhe
+begin
+		anzeigen ("Ruhe instruieren: 6 min, entspannen",1);
+		Biosemi(1);
+		anzeigen ("Ruhe gestartet",0);
+		wait_interval(360000);
+		Biosemi(0);
+		anzeigen ("Ruhe beendet",0);
+end;
+
+sub spice
+begin
+		anzeigen ("Ruhe instruieren: 1 min, entspannen",1);
+		Biosemi(1);
+		anzeigen ("Ruhe gestartet",0);
+		wait_interval(60000);
+		Biosemi(0);
+		anzeigen ("Ruhe beendet",0);
+end;
+
+################################################
+
+
+sub
+log_message(bool append, string message)
+begin
+	term.print(message + "\n");
+
+	string logfilename = string(vp) +"Ratings.txt";
+	output_file datenout = new output_file; # file IO at noncritical time
+	
+	if append == true then
+		datenout.open_append(logfilename); 
+	else
+		datenout.open(logfilename); 
+	end;
+	datenout.print(message+ "\n"); 
+	datenout.close();
+end;
+
+
+sub	
+log_message2(bool append, string message)
+begin
+	term.print(message + "\n");
+
+	string logfilename = string(vp) +"block.txt";
+	output_file datenout = new output_file; # file IO at noncritical time
+	
+	if append == true then
+		datenout.open_append(logfilename); 
+	else
+		datenout.open(logfilename); 
+	end;
+	
+	datenout.print(message+ "\n"); 
+	datenout.close();
+end;
+
+
+sub
+log_message3(bool append, string message)
+begin
+	term.print(message + "\n");
+
+	string logfilename = string(vp) +"rawdata.txt";
+	output_file datenout = new output_file; # file IO at noncritical time
+	
+	if append == true then
+		datenout.open_append(logfilename); 
+	else
+		datenout.open(logfilename); 
+	end;
+	
+	datenout.print(message+ "\n"); 
+	datenout.close();
+end;
+
+
+#####################################
+##################################### BEFINDLICHKEIT 
+
+
+sub 
+	Befinden (int nr, int bl)
+begin
+	int befindtaste;
+		array <string> befindlichkeiten 
+		[14] = 	 {"Intro", "proud", "sad", "warm", "happy" , "frust", "shame", "anger", "active", "positiv", "interes", "alert", "effort", "attention"};
+	int ende = 12;
+	if (bl == 2) then ende = 13 end;
+	loop int id = 1 until id > ende
+		begin
+			mood_rating[id].present();
+			if ( bool (response_manager.response_count(1)))
+				then  befindtaste = 1;		# Taste 1 
+			elseif ( bool (response_manager.response_count(2)))
+				then	befindtaste = 2;    	# Taste 2 
+			elseif ( bool (response_manager.response_count(3)))
+				then  befindtaste = 3;    	# Taste 3 
+			elseif ( bool (response_manager.response_count(4)))
+				then 	befindtaste = 4;    	# Taste 4 
+			elseif ( bool (response_manager.response_count(5)))
+				then	befindtaste = 5;    	# Taste 5 
+			elseif ( bool (response_manager.response_count(6)))
+				then	befindtaste = 6;    	# Taste 6
+			elseif ( bool (response_manager.response_count(7)))
+				then	befindtaste = 7;    	# Taste 7
+			elseif ( bool (response_manager.response_count(8)))
+				then	befindtaste = 8;    	# Taste 8 
+			elseif ( bool (response_manager.response_count(9)))
+				then	befindtaste = 9;    	# Taste 9 
+			else	
+				befindtaste = 100; 
+			end; # ende Tastenabfrage
+			default.present();
+			if befindtaste != 100 then # wenn keine falsche Taste  wurde
+				log_message(true,  "Abfrage Befinden, " +  string(nr)+ " , " + befindlichkeiten[id] + "," + string(befindtaste)+"\n" ); 
+				display_window.erase();
+				display_window.set_text_color(0, 255, 0);
+				display_window.draw_text (befindlichkeiten[id] +" "+ string(befindtaste) );	
+				wait_interval(750);	
+				befindtaste = 100;
+				id=id+1;
+			else 		# falsche Taste 
+				display_window.erase();
+				display_window.set_text_color(255, 0, 0);
+				display_window.draw_text ("VP hat ungueltige Taste gedrueckt");
+			end;                                                             
+			display_window.erase();
+	end;
+end;
+
+##################################### Spec_Subs
+
+sub
+practice
+begin
+	
+	# inter trial interval
+	int random_iti = random (1000, 1500);
+	iti_screen.set_duration(random_iti);
+	
+	int pstart_count;
+	int ptarget;
+	int pright_button;
+	int pwrong_button;
+	
+	loop int i = 3 until i < 1 
+	
+	begin
+		countdown[i].present();
+		i = i-1;
+	end;
+	
+	loop int pdg = 1; until pdg > 40
+	
+	begin
+	
+	bool pre_targeterror_cue = false;
+	ptarget = practice_trials[pdg];
+	
+	if ptarget == 1	then 
+		pright_button = 13; #  13 = rechts
+		pwrong_button = 12; #  12 = links
+	else 
+		pright_button = 12; 
+		pwrong_button = 13;    
+	end;
+	
+	if pdg == 21 then
+		practice_continue_text.set_formatted_text( true );
+		practice_continue_text.redraw();
+		practice_continue.present();
+	end;
+
+	pstart_count = response_manager.total_response_count();
+	
+	if pdg <= 20 then
+		int prandom_isi = random (2100, 2600);
+		isi_screen.set_duration(prandom_isi);
+	else
+		int prandom_isi = random (1600, 2100);
+		isi_screen.set_duration(prandom_isi);
+	end;
+	
+	if ptarget == 1  then  
+		Probe_event1.set_target_button(pright_button);
+		A_trial.present();
+			stimulus_data last = stimulus_manager.last_stimulus_data();
+			if last.type() == stimulus_false_alarm then
+				pre_targeterror_cue = true;
+				Feedback_trial.present();
+			else
+				isi_screen.present();
+				X_trial.present();
+			end;
+	elseif ptarget == 2  then
+		Probe_event1.set_target_button(pright_button);
+		double pcue = random ();
+		if pcue <= 0.2 then
+			B_trial_1.present();
+		elseif pcue > 0.2 && pcue <= 0.4 then
+			B_trial_2.present();
+		elseif pcue > 0.4 &&  pcue <= 0.6 then
+			B_trial_3.present();
+		elseif pcue > 0.6 && pcue <= 0.8 then
+			B_trial_4.present();
+		elseif pcue > 0.8 && pcue <= 1.0 then
+			B_trial_5.present();
+		end;
+		stimulus_data last = stimulus_manager.last_stimulus_data();
+		if last.type() == stimulus_false_alarm then
+			pre_targeterror_cue = true;
+			Feedback_trial.present();
+		else
+			isi_screen.present();
+			X_trial.present();
+		end;
+	elseif ptarget == 3 then
+		double pprobe = random ();
+		A_trial.present();
+		stimulus_data last = stimulus_manager.last_stimulus_data();
+		if last.type() == stimulus_false_alarm then
+			pre_targeterror_cue = true;
+			Feedback_trial.present();
+		else
+			isi_screen.present();
+		if pprobe <= 0.2 then
+			Probe_event2.set_target_button(pright_button);
+			Y_trial_1.present();
+		elseif pprobe > 0.2 && pprobe <= 0.4 then
+			Probe_event3.set_target_button(pright_button);
+			Y_trial_2.present();
+		elseif pprobe > 0.4 &&  pprobe <= 0.6 then
+			Probe_event4.set_target_button(pright_button);
+			Y_trial_3.present();
+		elseif pprobe > 0.6 && pprobe <= 0.8 then
+			Probe_event5.set_target_button(pright_button);
+			Y_trial_4.present();
+		elseif pprobe > 0.8 && pprobe <= 1.0 then
+			Probe_event6.set_target_button(pright_button);
+			Y_trial_5.present();
+		end;
+		end;
+	elseif ptarget == 4 then
+		double pcue = random ();
+		double pprobe = random ();
+		if pcue <= 0.2 then
+			B_trial_1.present();
+		elseif pcue > 0.2 && pcue <= 0.4 then
+			B_trial_2.present();
+		elseif pcue > 0.4 && pcue <= 0.6 then
+			B_trial_3.present();
+		elseif pcue > 0.6 && pcue <= 0.8 then
+			B_trial_4.present();
+		elseif pcue > 0.8 && pcue <= 1.0 then
+			B_trial_5.present();
+		end;
+		stimulus_data last = stimulus_manager.last_stimulus_data();
+		if last.type() == stimulus_false_alarm then
+			pre_targeterror_cue = true;
+			Feedback_trial.present();
+		else
+			isi_screen.present();
+		if pprobe <= 0.2 then
+			Probe_event2.set_target_button(pright_button);
+			Y_trial_1.present();
+		elseif pprobe > 0.2 && pprobe <= 0.4 then
+			Probe_event3.set_target_button(pright_button);
+			Y_trial_2.present();
+		elseif pprobe > 0.4 &&  pprobe <= 0.6 then
+			Probe_event4.set_target_button(pright_button);
+			Y_trial_3.present();
+		elseif pprobe > 0.6 && pprobe <= 0.8 then
+			Probe_event5.set_target_button(pright_button);
+			Y_trial_4.present();
+		elseif pprobe > 0.8 && pprobe <= 1.0 then
+			Probe_event6.set_target_button(pright_button);
+			Y_trial_5.present();
+		end;
+		end;
+	end;
+	
+	# wuerde die R-Taste gedrueckt?
+	if (pstart_count < response_manager.total_response_count()) then
+		# war das zufrüh
+		if (pre_targeterror_cue == true) then
+			iti_screen.present();
+		# Reaktionstaste gedrueckt
+		elseif (bool (response_manager.hits())) then
+			blank_screen.present();
+			if pdg <= 20 then
+				FB_Correct.present();
+			end;
+			iti_screen.present();
+			display_window.erase();
+			display_window.draw_text ("Trial " + string(pdg) + " Richtig");			
+		elseif (bool (response_manager.incorrects())) then
+			blank_screen.present();
+			if pdg <= 20 then
+				FB_Falsch.present();
+			end;
+			iti_screen.present();
+			display_window.erase();
+			display_window.draw_text ("Trial " + string(pdg) + " Falsch");	
+		end;
+	else
+		blank_screen.present();
+		if pdg <= 20 then
+			FB_Slow.present();
+		end;
+		iti_screen.present();
+		display_window.erase();
+		display_window.draw_text ("Trial " + string(pdg) + " zu langsam");
+	end;
+		pdg = pdg+1;
+	end;
+	Biosemi(0);
+end;
+
+################### manipulation_trials ##################################
+
+sub
+manipulation_trials
+begin
+	
+	blocks.shuffle();
+	
+	int random_isi = 1600;
+	isi_screen.set_duration(random_isi); 
+	
+	int random_min;
+	if reward == 0 then
+		random_min = random(750, 1250);
+
+	else
+		random_min = random(250, 750);
+	end;
+	
+	iti_screen.set_duration(random_min);
+	blank_event.set_duration(750);
+
+loop  int min_bl = 1; until min_bl > 10
+
+begin
+	
+	int right_button;
+	int wrong_button;
+
+	int min_start_count = 0; 
+	int min_correct = 0; 
+	int min_incorrect = 0;
+	int min_false_alarm = 0;
+	int min_miss = 0;
+	
+	if blocks[min_bl] == 1 then
+		manipulation_screen.set_background_color( 0, 120, 0 );
+		manipulation_event.set_port_code( 99 );
+	else
+		manipulation_screen.set_background_color( 84, 84, 84 );
+		manipulation_event.set_port_code( 98 );
+	end;
+
+	manipulation.present();
+
+	loop int i = 3 until i < 1 
+	begin
+		countdown[i].present();
+		i = i-1;
+	end;
+
+loop int min_dg = 1; until min_dg > 30
+
+begin
+	
+	if mini_block [min_bl][min_dg] == 1	then 
+		right_button = 13; #  13 = links
+		wrong_button = 12; #  12 = rechts
+	else 
+		right_button = 12; 
+		wrong_button = 13;    
+	end;
+
+	min_start_count = response_manager.total_response_count();
+	
+	if mini_block [min_bl][min_dg] == 1  then  
+			Probe_event1.set_target_button(right_button);
+			A_trial.present();
+			isi_screen.present();
+			X_trial.present();
+	elseif mini_block [min_bl][min_dg] == 2  then
+		Probe_event1.set_target_button(right_button);
+		double cue = random ();
+		if cue <= 0.2 then
+			B_trial_1.present();
+		elseif cue > 0.2 && cue <= 0.4 then
+			B_trial_2.present();
+		elseif cue > 0.4 &&  cue <= 0.6 then
+			B_trial_3.present();
+		elseif cue > 0.6 && cue <= 0.8 then
+			B_trial_4.present();
+		elseif cue > 0.8 && cue <= 1.0 then
+			B_trial_5.present();
+		end;
+		isi_screen.present();
+		X_trial.present();
+	elseif mini_block [min_bl][min_dg] == 3 then
+		double probe = random ();
+		A_trial.present();
+		isi_screen.present();
+		if probe <= 0.2 then
+			Probe_event2.set_target_button(right_button);
+			Y_trial_1.present();
+		elseif probe > 0.2 && probe <= 0.4 then
+			Probe_event3.set_target_button(right_button);
+			Y_trial_2.present();
+		elseif probe > 0.4 &&  probe <= 0.6 then
+			Probe_event4.set_target_button(right_button);
+			Y_trial_3.present();
+		elseif probe > 0.6 && probe <= 0.8 then
+			Probe_event5.set_target_button(right_button);
+			Y_trial_4.present();
+		elseif probe > 0.8 && probe <= 1.0 then
+			Probe_event6.set_target_button(right_button);
+			Y_trial_5.present();
+		end;
+	elseif mini_block [min_bl][min_dg] == 4 then
+		double cue = random ();
+		double probe = random ();
+		if cue <= 0.2 then
+			B_trial_1.present();
+		elseif cue > 0.2 && cue <= 0.4 then
+			B_trial_2.present();
+		elseif cue> 0.4 && cue <= 0.6 then
+			B_trial_3.present();
+		elseif cue > 0.6 && cue <= 0.8 then
+			B_trial_4.present();
+		elseif cue > 0.8 && cue <= 1.0 then
+			B_trial_5.present();
+		end;
+		isi_screen.present();
+		if probe <= 0.2 then
+			Probe_event2.set_target_button(right_button);
+			Y_trial_1.present();
+		elseif probe > 0.2 && probe <= 0.4 then
+			Probe_event3.set_target_button(right_button);
+			Y_trial_2.present();
+		elseif probe > 0.4 &&  probe <= 0.6 then
+			Probe_event4.set_target_button(right_button);
+			Y_trial_3.present();
+		elseif probe > 0.6 && probe <= 0.8 then
+			Probe_event5.set_target_button(right_button);
+			Y_trial_4.present();
+		elseif probe > 0.8 && probe <= 1.0 then
+			Probe_event6.set_target_button(right_button);
+			Y_trial_5.present();
+		end;
+	end;
+	
+	# button press?
+	if (min_start_count < response_manager.total_response_count()) then
+		# save reaction time
+		min_dpx_rz[min_dg] = stimulus_manager.last_stimulus_data().reaction_time(); 
+		# reaction correct?
+		if stimulus_manager.last_stimulus_data().type() == stimulus_hit then
+			blank_screen.present();
+			min_Rtype = "hit";
+			min_correct = min_correct + 1;
+				# show feedback?
+				if (reward == 1) && (blocks[min_bl] == 1)  then
+					FB_Correct.present();
+				end;
+		else
+			blank_screen.present();
+			min_Rtype = "incorrect";
+			min_incorrect = min_incorrect + 1;
+				# show feedback?
+				if (reward == 1) && (blocks[min_bl] == 1)  then
+					FB_Falsch.present();
+				end;
+		end;
+	else
+			blank_screen.present();
+			min_dpx_rz [min_dg] = 99999;
+			min_miss = min_miss + 1;
+			min_Rtype = "miss";
+			FB_Slow.present();
+	end;
+	
+	# inter trial interval
+	iti_screen.present();
+	
+	log_message2(true, "Group, " + string(reward) + ", Block, " + string (min_bl) + "" + string(blocks[min_bl]) + 
+								", trialnr, "+ string (min_dg) + ", trialtype, "+ string (mini_block [min_bl][min_dg]) + 
+								", RZ, "+ string (min_dpx_rz[min_dg]) + ", ReactionType, " + min_Rtype);
+	
+	display_window.erase();
+	display_window.draw_text ("Group, " + string(reward) + ", Block, " + string (min_bl) + "" + string(blocks[min_bl]) + 
+										", trialnr, "+ string (min_dg) + ", trialtype, " + string (mini_block[min_bl][min_dg]) + 
+										", RZ, "+ string (min_dpx_rz[min_dg]) + ", ReactionType, " + min_Rtype);
+	
+	# count trial
+	min_dg = min_dg+1;
+	end;
+
+# count block
+min_bl = min_bl+1;
+
+end;
+Biosemi(0);
+end;
+	
+	
+	
+############################################
+############################################ LOG_message

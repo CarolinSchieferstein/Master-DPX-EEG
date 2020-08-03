@@ -1,0 +1,122 @@
+################ Main PCL DPX #########################
+preset int vp;
+preset int exp_block = 0;
+
+
+double rew_group = random();
+int reward;
+if (rew_group >= 0.5) then
+	reward = 1;
+else
+	reward = 0;
+end;
+
+include "DPX_Caro_Subs.pcl";
+
+if exp_block == 0 then
+
+instruction_trial[1].present();
+
+#introruhe_trial.present();
+#ruhe();
+#anzeigen("Press Space to continue",1);
+
+Befinden(1,1); 
+
+exp_block = exp_block +1;
+
+end;
+
+##################################### Block 1 -- Practice ###
+if exp_block == 1 then
+
+anzeigen ("Instruktion geht los",0);
+
+instruction_trial[2].present();
+instruction_trial[3].present();
+instruction_trial[4].present();
+instruction_trial[5].present();
+instruction_trial[6].present();
+instruction_trial[7].present();
+
+exp_block = exp_block +1;
+
+end;
+
+# ----- UEBUNGSPHASE -----
+if exp_block == 2 then
+
+anzeigen ("Uebungsphase geht los",0);
+practice_intro_text.set_formatted_text( true );
+practice_intro_text.redraw();
+practice_intro.present();
+
+instruction_trial[8].present();
+
+display_window.set_background_color (255, 193 , 193);
+
+Biosemi(1);	
+practice();
+
+display_window.set_background_color (190, 190 , 190);
+
+exp_block = exp_block+1;
+
+end;
+
+# TEST-PHASE
+if exp_block == 3 then
+	
+#anzeigen ("Uebungsphase ist fertig, bei schlechter Leistung fragen, ob alles ok ist",0);
+#test_intro_text.set_formatted_text( true );
+#test_intro_text.redraw();
+#test_intro.present();
+
+#Instruktion_trial[10].present();
+#Biosemi(1);
+
+#display_window.set_background_color (255, 193 , 193);
+#main_trials();
+#display_window.set_background_color (190, 190 , 190);
+
+exp_block = exp_block +1;
+
+#Befinden (1,4);
+end;
+
+#Biosemi(0);
+
+if exp_block == 4 then
+	
+manipulation_0_text.set_formatted_text( true );
+manipulation_0_text.redraw();
+	
+manipulation_1_text.set_formatted_text( true );
+manipulation_1_text.redraw();
+
+if reward == 0 then
+	manipulation_0_intro.present();
+else
+	manipulation_1_intro.present();
+end;
+
+pause.present();
+Correct.set_caption( "<font color='0, 120, 0'><b>+1</b></font>" );
+Correct.set_formatted_text( true );
+Correct.redraw();
+False.set_caption( "<font color='214,213,213'> </font>" );
+False.set_formatted_text( true );
+False.redraw();
+
+display_window.set_background_color (255, 193 , 193);
+
+Biosemi(1);
+manipulation_trials();
+
+display_window.set_background_color (190, 190 , 190);
+
+the_end_text.set_formatted_text( true );
+the_end_text.redraw();
+the_end.present();
+
+end;
