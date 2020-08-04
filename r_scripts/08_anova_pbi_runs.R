@@ -129,7 +129,7 @@ anova(pbi_rt_mod)
 car::Anova(pbi_rt_mod, test = "F")
 car::qqPlot(resid((pbi_rt_mod)))
 
-sjPlot::plot_model(pbi_rt_mod, "pred")
+sjPlot::plot_model(pbi_rt_mod, "int")
 
 
 # ----- 3) PBI on FR ---------------------

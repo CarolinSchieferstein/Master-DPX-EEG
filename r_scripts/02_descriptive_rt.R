@@ -54,6 +54,22 @@ Correct_sum <- Correct %>% group_by(trialtype, group, reward) %>%
 # Plot
 require(ggplot2)
 
+# gesamt
+Correct_sum_all <- Correct %>% group_by(trialtype) %>% 
+                               summarise(m_rt = mean(rt),
+                                         sd_rt = sd(rt),
+                                         se_rt = sd(rt)/sqrt(sum(!is.na(rt))),
+                                         n = sum(!is.na(rt)))
+
+Correct_plot_both <- ggplot(Correct_sum_all, aes(x=trialtype, y=m_rt, group = 1, color= trialtype)) +
+  geom_errorbar(aes(ymin=m_rt-se_rt, ymax=m_rt+se_rt), width=.1, position=position_dodge(.5)) +
+  geom_line(position=position_dodge(.5), color = "black") +
+  geom_point(position=position_dodge(.5), size=3) + 
+  theme_light()
+
+print(Correct_plot_both)
+
+# getrennt nach group & reward
 Correct_sum$group <- factor(Correct_sum$group, labels = c("verzögert", "direkt"))
 Correct_sum$reward <- factor(Correct_sum$reward, labels = c("off", "on"))
 

@@ -98,6 +98,21 @@ levels(Incorrect_sum$trialtype)
 # Plot
 require(ggplot2)
 
+# gesamt
+Incorrect_sum_all <- Incorrect_sum_ID %>% dplyr::group_by(trialtype) %>%
+                                          dplyr::summarise(m_FR=mean(FR),
+                                                           se_FR=sd(FR)/sqrt(sum(!is.na(FR)))
+                                                           )
+
+Incorrect_plot_both <- ggplot(Incorrect_sum_all, aes(x=trialtype, y=m_FR, group = 1, color= trialtype)) +
+  geom_errorbar(aes(ymin=m_FR-se_FR, ymax=m_FR+se_FR), width=.1, position=position_dodge(.5)) +
+  geom_line(position=position_dodge(.5), color = "black") +
+  geom_point(position=position_dodge(.5), size=3) + 
+  theme_light()
+
+print(Incorrect_plot_both)
+
+# getrennt nach group und reward
 Incorrect_sum$group <- factor(Incorrect_sum$group, labels = c("verzögert", "direkt"))
 Incorrect_sum$reward <- factor(Incorrect_sum$reward, labels = c("off", "on"))
 
